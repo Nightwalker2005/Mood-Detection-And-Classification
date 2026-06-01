@@ -54,5 +54,5 @@ src/          # source code
 
 ## Team
 
-- Nightwalker2005
-- (Andy Sackey)
+- Prince Geraldo
+- Andy Sackey
