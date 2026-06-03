@@ -1,41 +1,49 @@
 # Mood-Detection-Classification-Project
 
-Classify moods into 3 groups — Positive, Negative, and Neutral. The system detects faces in an image or webcam feed and classifies each face's mood along with a confidence score.
+A real-time facial mood detector. It finds faces in a webcam feed, classifies each face's mood into one of three groups — **Positive**, **Negative**, or **Neutral** — and displays the result with a confidence score.
 
-## Overview
+## How It Works
 
-The pipeline runs in two stages:
+The system runs a two-stage pipeline on each video frame:
 
-1. **Face detection** — locate faces in an image or video frame.
-2. **Mood classification** — pass each detected face to a trained model that predicts its mood and a confidence level.
+1. **Face detection** (`src/face_detection.py`) — uses OpenCV's Haar Cascade classifier to locate faces and crop them out of the frame.
+2. **Mood classification** (`src/predict.py`) — passes each cropped face to DeepFace's pre-trained emotion model, which returns seven emotion scores. These are folded into three groups, and the strongest group is reported with its confidence.
 
-Detected emotions are grouped into three categories:
-- **Positive** — e.g. happy, surprised
-- **Negative** — e.g. angry, sad, fearful, disgusted
-- **Neutral** — neutral
+The entry point (`src/app.py`) ties the two stages together and draws the labeled results onto the live video.
+
+### Emotion grouping
+
+| Group    | Emotions                  |
+|----------|---------------------------|
+| Positive | happy, surprise           |
+| Negative | angry, disgust, fear, sad |
+| Neutral  | neutral                   |
 
 ## Project Structure
 
 ```
-data/         # datasets (kept local, not committed)
-models/       # trained model files (kept local)
-notebooks/    # Jupyter notebooks for experiments
-src/          # source code
-  face_detection.py   # find faces in an image/frame
-  preprocess.py       # prepare cropped faces for the model
-  train.py            # train the emotion classifier
-  predict.py          # run a face through the model -> mood + confidence
-  app.py              # entry point tying it together
+src/
+  face_detection.py   # detect and crop faces (OpenCV Haar Cascade)
+  predict.py          # classify mood with DeepFace, group into 3 categories
+  app.py              # entry point: runs the webcam pipeline
+data/                 # placeholder (for a future custom-model dataset)
+models/               # placeholder (for a future custom-trained model)
+notebooks/            # placeholder (for experiments)
+requirements.txt      # Python dependencies
 ```
 
+> `data/`, `models/`, `notebooks/`, and the empty `train.py`/`preprocess.py` are scaffolding for a possible future version that trains its own model. The current version uses DeepFace's pre-trained model and does not need them.
+
 ## Setup
+
+**Requires Python 3.13** (TensorFlow does not yet support Python 3.14).
 
 1. Clone the repository:
 ```
    git clone https://github.com/Nightwalker2005/Mood-Detection-Classification-Project.git
    cd Mood-Detection-Classification-Project
 ```
-2. Create and activate a virtual environment (Python 3.13):
+2. Create and activate a virtual environment with Python 3.13:
 ```
    py -3.13 -m venv venv
    venv\Scripts\activate
@@ -45,12 +53,29 @@ src/          # source code
    pip install -r requirements.txt
 ```
 
+## Usage
+
+Run from the project root:
+
+```
+python src\app.py
+```
+
+A webcam window opens with a green box and a mood label (e.g. `Positive (87%)`) over each detected face. Press **q** in the window to quit.
+
+> On the **first run**, DeepFace downloads its emotion model (~6 MB), so it needs internet and takes a little longer to start. After that it runs offline.
+
+## Notes
+
+- `predict.py` sets `TF_USE_LEGACY_KERAS=1` so DeepFace works with the Keras 3 bundled in recent TensorFlow, and stores model weights in an ASCII-only path. These are handled in code — no extra setup needed.
+- The emotion model is trained on FER-2013. Like most models trained on it, it can read calm or concentrating faces as sad/negative; clear expressions (a big smile, a frown) classify more reliably.
+
 ## Tech Stack
 
 - Python 3.13
-- TensorFlow / Keras
-- OpenCV
-- NumPy, Matplotlib
+- OpenCV — face detection
+- DeepFace + TensorFlow / tf-keras — emotion classification
+- NumPy
 
 ## Team
 

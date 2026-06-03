@@ -5,3 +5,8 @@ __pycache__/
 .DS_Store
 *.h5
 *.keras
+# Input media and generated outputs (keep the folders, ignore their contents)
+inputs/*
+!inputs/.gitkeep
+outputs/*
+!outputs/.gitkeep
